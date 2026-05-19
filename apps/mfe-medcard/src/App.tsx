@@ -1,23 +1,24 @@
 import React, { useEffect } from 'react';
-import { observer } from 'mobx-react-lite';
-import { medcardStore } from './store';
+import { Provider } from 'react-redux';
+import { store, useAppDispatch, useAppSelector, fetchRecords } from './store';
 
-const App = observer(() => {
+const Inner = () => {
+  const dispatch = useAppDispatch();
+  const { items, loading, error } = useAppSelector((s) => s.medcard);
+
   useEffect(() => {
-    medcardStore.fetch();
+    dispatch(fetchRecords());
   }, []);
 
   return (
     <div>
       <h2>Моя медицинская карта</h2>
 
-      {medcardStore.loading && <div>Загрузка...</div>}
-      {medcardStore.error && <div className="error">{medcardStore.error}</div>}
-      {medcardStore.items.length === 0 && !medcardStore.loading && (
-        <div>В вашей карте пока нет записей</div>
-      )}
+      {loading && <div>Загрузка...</div>}
+      {error && <div className="error">{error}</div>}
+      {items.length === 0 && !loading && <div>В вашей карте пока нет записей</div>}
 
-      {medcardStore.items.map((r) => (
+      {items.map((r) => (
         <div key={r.id} className="card">
           <div>
             <strong>Диагноз:</strong> {r.diagnosis}
@@ -35,6 +36,12 @@ const App = observer(() => {
       ))}
     </div>
   );
-});
+};
+
+const App = () => (
+  <Provider store={store}>
+    <Inner />
+  </Provider>
+);
 
 export default App;

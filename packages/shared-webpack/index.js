@@ -44,8 +44,8 @@ module.exports = ({ name, port, exposes = {}, remotes = {}, rootDir }) => ({
       shared: {
         react: { singleton: true, requiredVersion: deps.version },
         'react-dom': { singleton: true, requiredVersion: deps.version },
-        mobx: { singleton: true },
-        'mobx-react-lite': { singleton: true }
+        'react-redux': { singleton: true },
+        '@reduxjs/toolkit': { singleton: true }
       }
     }),
     new HtmlWebpackPlugin({ template: path.resolve(rootDir, 'public/index.html') })

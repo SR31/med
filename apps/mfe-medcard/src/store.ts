@@ -1,4 +1,5 @@
-import { makeAutoObservable, runInAction } from 'mobx';
+import { configureStore, createSlice, createAsyncThunk } from '@reduxjs/toolkit';
+import { useDispatch, useSelector, TypedUseSelectorHook } from 'react-redux';
 import axios from 'axios';
 
 axios.interceptors.request.use((config) => {
@@ -35,39 +36,63 @@ export interface MedicalRecord {
   created_at: string;
 }
 
-class MedcardStore {
-  items: MedicalRecord[] = [];
-  loaded = false;
-  loading = false;
-  error: string | null = null;
-
-  constructor() {
-    makeAutoObservable(this);
-  }
-
-  async fetch() {
-    if (this.loaded || this.loading) return;
-    this.loading = true;
-    this.error = null;
-    try {
-      const { data } = await axios.get<MedicalRecord[]>('http://localhost:4001/records');
-      runInAction(() => {
-        this.items = data;
-        this.loaded = true;
-      });
-    } catch (e: any) {
-      runInAction(() => {
-        this.error = e.response?.data?.message ?? 'Не удалось загрузить медицинскую карту';
-      });
-    } finally {
-      runInAction(() => { this.loading = false; });
-    }
-  }
-
-  invalidate() {
-    this.loaded = false;
-    this.items = [];
-  }
+interface State {
+  items: MedicalRecord[];
+  loaded: boolean;
+  loading: boolean;
+  error: string | null;
 }
 
-export const medcardStore = new MedcardStore();
+const initialState: State = {
+  items: [],
+  loaded: false,
+  loading: false,
+  error: null
+};
+
+export const fetchRecords = createAsyncThunk<
+  MedicalRecord[],
+  void,
+  { state: { medcard: State }; rejectValue: string }
+>('medcard/fetch', async (_, { getState, rejectWithValue }) => {
+  if (getState().medcard.loaded) {
+    return getState().medcard.items;
+  }
+  try {
+    const { data } = await axios.get<MedicalRecord[]>('http://localhost:4001/records');
+    return data;
+  } catch (e: any) {
+    return rejectWithValue(e.response?.data?.message ?? 'Не удалось загрузить медицинскую карту');
+  }
+});
+
+const slice = createSlice({
+  name: 'medcard',
+  initialState,
+  reducers: {},
+  extraReducers: (builder) => {
+    builder
+      .addCase(fetchRecords.pending, (s) => {
+        s.loading = true;
+        s.error = null;
+      })
+      .addCase(fetchRecords.fulfilled, (s, a) => {
+        s.loading = false;
+        s.items = a.payload;
+        s.loaded = true;
+      })
+      .addCase(fetchRecords.rejected, (s, a) => {
+        s.loading = false;
+        s.error = a.payload ?? 'Ошибка загрузки';
+      });
+  }
+});
+
+export const store = configureStore({
+  reducer: { medcard: slice.reducer }
+});
+
+export type RootState = ReturnType<typeof store.getState>;
+export type AppDispatch = typeof store.dispatch;
+export const useAppDispatch: () => AppDispatch = useDispatch;
+export const useAppSelector: TypedUseSelectorHook<RootState> = useSelector;

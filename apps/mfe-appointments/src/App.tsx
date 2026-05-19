@@ -1,6 +1,15 @@
 import React, { useEffect, useState } from 'react';
-import { observer } from 'mobx-react-lite';
-import { appointmentsStore, Appointment } from './store';
+import { Provider } from 'react-redux';
+import {
+  store,
+  useAppDispatch,
+  useAppSelector,
+  fetchAppointments,
+  fetchDoctors,
+  bookAppointment,
+  completeAppointment,
+  Appointment
+} from './store';
 
 const getCurrentUser = (): { id: number; role: 'PATIENT' | 'DOCTOR' } | null => {
   const saved = localStorage.getItem('auth');
@@ -12,19 +21,21 @@ const getCurrentUser = (): { id: number; role: 'PATIENT' | 'DOCTOR' } | null => 
   }
 };
 
-const PatientView = observer(() => {
+const PatientView = () => {
+  const dispatch = useAppDispatch();
+  const { items, doctors, doctorsLoaded, loading, error } = useAppSelector((s) => s.appointments);
   const [doctorId, setDoctorId] = useState('');
   const [date, setDate] = useState('');
 
   const submit = () => {
     if (!doctorId || !date) return;
-    appointmentsStore.book(Number(doctorId), date);
+    dispatch(bookAppointment({ doctor_id: Number(doctorId), date }));
     setDoctorId('');
     setDate('');
   };
 
   const doctorName = (id: number) => {
-    const d = appointmentsStore.doctors.find((x) => x.id === id);
+    const d = doctors.find((x) => x.id === id);
     return d ? d.full_name : `Врач #${id}`;
   };
 
@@ -43,7 +54,7 @@ const PatientView = observer(() => {
               onChange={(e) => setDoctorId(e.target.value)}
             >
               <option value="">— выберите врача —</option>
-              {appointmentsStore.doctors.map((d) => (
+              {doctors.map((d) => (
                 <option key={d.id} value={d.id}>
                   {d.full_name} ({d.email})
                 </option>
@@ -65,18 +76,16 @@ const PatientView = observer(() => {
             Записаться
           </button>
         </div>
-        {appointmentsStore.doctors.length === 0 && appointmentsStore.doctorsLoaded && (
+        {doctors.length === 0 && doctorsLoaded && (
           <div className="hint">В системе пока нет зарегистрированных врачей</div>
         )}
       </div>
 
       <h3>Мои записи</h3>
-      {appointmentsStore.loading && <div>Загрузка...</div>}
-      {appointmentsStore.error && <div className="error">{appointmentsStore.error}</div>}
-      {appointmentsStore.items.length === 0 && !appointmentsStore.loading && (
-        <div>Записей пока нет</div>
-      )}
-      {appointmentsStore.items.map((a) => (
+      {loading && <div>Загрузка...</div>}
+      {error && <div className="error">{error}</div>}
+      {items.length === 0 && !loading && <div>Записей пока нет</div>}
+      {items.map((a) => (
         <div key={a.id} className="card">
           <div>
             <strong>Врач:</strong> {doctorName(a.doctor_id)}
@@ -91,9 +100,10 @@ const PatientView = observer(() => {
       ))}
     </div>
   );
-});
+};
 
-const CompleteForm = observer(({ appointment }: { appointment: Appointment }) => {
+const CompleteForm = ({ appointment }: { appointment: Appointment }) => {
+  const dispatch = useAppDispatch();
   const [diagnosis, setDiagnosis] = useState('');
   const [description, setDescription] = useState('');
   const [busy, setBusy] = useState(false);
@@ -101,9 +111,11 @@ const CompleteForm = observer(({ appointment }: { appointment: Appointment }) =>
   const submit = async () => {
     if (!diagnosis.trim()) return;
     setBusy(true);
-    const ok = await appointmentsStore.complete(appointment.id, diagnosis, description);
+    const res = await dispatch(
+      completeAppointment({ id: appointment.id, diagnosis, description })
+    );
     setBusy(false);
-    if (ok) {
+    if (completeAppointment.fulfilled.match(res)) {
       setDiagnosis('');
       setDescription('');
     }
@@ -138,18 +150,17 @@ const CompleteForm = observer(({ appointment }: { appointment: Appointment }) =>
       </button>
     </div>
   );
-});
+};
 
-const DoctorView = observer(() => {
+const DoctorView = () => {
+  const { items, loading, error } = useAppSelector((s) => s.appointments);
   return (
     <div>
       <h2>Мои приёмы</h2>
-      {appointmentsStore.loading && <div>Загрузка...</div>}
-      {appointmentsStore.error && <div className="error">{appointmentsStore.error}</div>}
-      {appointmentsStore.items.length === 0 && !appointmentsStore.loading && (
-        <div>Записей пока нет</div>
-      )}
-      {appointmentsStore.items.map((a) => (
+      {loading && <div>Загрузка...</div>}
+      {error && <div className="error">{error}</div>}
+      {items.length === 0 && !loading && <div>Записей пока нет</div>}
+      {items.map((a) => (
         <div key={a.id} className="card">
           <div>
             <strong>Пациент:</strong> #{a.patient_id}
@@ -165,20 +176,27 @@ const DoctorView = observer(() => {
       ))}
     </div>
   );
-});
+};
 
-const App = observer(() => {
+const Inner = () => {
+  const dispatch = useAppDispatch();
   const user = getCurrentUser();
 
   useEffect(() => {
-    appointmentsStore.fetch();
+    dispatch(fetchAppointments());
     if (user?.role === 'PATIENT') {
-      appointmentsStore.fetchDoctors();
+      dispatch(fetchDoctors());
     }
   }, []);
 
   if (!user) return null;
   return user.role === 'DOCTOR' ? <DoctorView /> : <PatientView />;
-});
+};
+
+const App = () => (
+  <Provider store={store}>
+    <Inner />
+  </Provider>
+);
 
 export default App;
