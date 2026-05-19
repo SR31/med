@@ -3,6 +3,7 @@ version: '3.9'
 services:
   postgres:
     image: postgres:16-alpine
+    container_name: med-postgres
     environment:
       POSTGRES_USER: med
       POSTGRES_PASSWORD: med
@@ -20,6 +21,7 @@ services:
     build:
       context: .
       dockerfile: apps/backend-auth/Dockerfile
+    container_name: med-backend-auth
     environment:
       DB_HOST: postgres
       DB_PORT: 5432
@@ -37,6 +39,7 @@ services:
     build:
       context: .
       dockerfile: apps/backend-api/Dockerfile
+    container_name: med-backend-api
     environment:
       DB_HOST: postgres
       DB_PORT: 5432
@@ -50,15 +53,30 @@ services:
       postgres:
         condition: service_healthy
 
+  mfe-appointments:
+    build:
+      context: .
+      dockerfile: apps/mfe-appointments/Dockerfile
+    container_name: med-mfe-appointments
+
+  mfe-medcard:
+    build:
+      context: .
+      dockerfile: apps/mfe-medcard/Dockerfile
+    container_name: med-mfe-medcard
+
   frontend:
     build:
       context: .
       dockerfile: apps/frontend-host/Dockerfile
+    container_name: med-frontend
     ports:
       - '80:80'
     depends_on:
       - backend-auth
       - backend-api
+      - mfe-appointments
+      - mfe-medcard
 
 volumes:
   pgdata:
