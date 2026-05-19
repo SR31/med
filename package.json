@@ -1,0 +1,35 @@
+{
+  "name": "med-platform",
+  "version": "1.0.0",
+  "private": true,
+  "workspaces": [
+    "packages/*",
+    "apps/*"
+  ],
+  "scripts": {
+    "build:auth": "npm run build --workspace=backend-auth",
+    "build:api": "npm run build --workspace=backend-api",
+    "build:host": "npm run build --workspace=frontend-host",
+    "build:appointments": "npm run build --workspace=mfe-appointments",
+    "build:medcard": "npm run build --workspace=mfe-medcard",
+    "build:all": "npm run build:auth && npm run build:api && npm run build:host && npm run build:appointments && npm run build:medcard",
+    "start:auth": "npm run start --workspace=backend-auth",
+    "start:api": "npm run start --workspace=backend-api",
+    "dev:auth": "npm run start:dev --workspace=backend-auth",
+    "dev:api": "npm run start:dev --workspace=backend-api",
+    "dev:host": "npm run dev --workspace=frontend-host",
+    "dev:appointments": "npm run dev --workspace=mfe-appointments",
+    "dev:medcard": "npm run dev --workspace=mfe-medcard",
+    "db:up": "docker-compose -f docker-compose.dev.yml up -d",
+    "db:down": "docker-compose -f docker-compose.dev.yml down",
+    "db:logs": "docker-compose -f docker-compose.dev.yml logs -f postgres",
+    "dev": "concurrently -n auth,api,host,appts,medcard -c blue,green,magenta,yellow,cyan \"npm:dev:auth\" \"npm:dev:api\" \"npm:dev:host\" \"npm:dev:appointments\" \"npm:dev:medcard\"",
+    "prod:up": "docker-compose up --build",
+    "prod:down": "docker-compose down",
+    "prod:logs": "docker-compose logs -f"
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2",
+    "typescript": "^5.3.0"
+  }
+}
