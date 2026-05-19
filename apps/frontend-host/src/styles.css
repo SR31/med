@@ -1,0 +1,75 @@
+* { box-sizing: border-box; font-family: -apple-system, Segoe UI, Roboto, sans-serif; }
+body { margin: 0; background: #f5f7fa; color: #1f2937; }
+header { display: flex; gap: 24px; align-items: center; padding: 16px 24px; background: #2563eb; color: white; }
+header h1 { margin: 0; font-size: 18px; flex-shrink: 0; }
+header nav { display: flex; gap: 16px; flex: 1; }
+header nav a { color: white; text-decoration: none; }
+header button { background: white; color: #2563eb; border: none; padding: 6px 14px; border-radius: 4px; cursor: pointer; }
+main { padding: 24px; min-height: calc(100vh - 130px); }
+footer { padding: 16px 24px; background: #1f2937; color: #9ca3af; text-align: center; }
+
+.login { max-width: 380px; margin: 80px auto; background: white; padding: 32px; border-radius: 12px; box-shadow: 0 8px 24px rgba(0,0,0,.08); }
+.login h2 { margin-top: 0; text-align: center; }
+.login input { display: block; width: 100%; padding: 11px 12px; margin: 10px 0; border: 1px solid #d1d5db; border-radius: 6px; font-size: 14px; transition: border-color .15s, box-shadow .15s; }
+.login input:focus { outline: none; border-color: #2563eb; box-shadow: 0 0 0 3px rgba(37,99,235,.15); }
+.login button { width: 100%; padding: 11px; background: #2563eb; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 14px; font-weight: 500; margin-top: 6px; }
+.login button:disabled { background: #93c5fd; cursor: not-allowed; }
+.error { color: #dc2626; margin-top: 12px; font-size: 13px; }
+.hint { color: #6b7280; margin-top: 12px; font-size: 13px; font-style: italic; }
+
+.role-picker { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 12px 0; }
+.role-option { display: flex; flex-direction: column; align-items: center; gap: 6px; padding: 14px 10px; background: #f9fafb; border: 2px solid #e5e7eb; border-radius: 10px; cursor: pointer; transition: all .15s; color: #1f2937; }
+.role-option:hover { border-color: #93c5fd; background: white; }
+.role-option.active { border-color: #2563eb; background: #eff6ff; box-shadow: 0 0 0 3px rgba(37,99,235,.12); }
+.role-option.active .role-text, .role-option:hover .role-text { color: #2563eb }
+.role-option .role-text { color: #eff6ff }
+.role-icon { font-size: 26px; line-height: 1; }
+.role-text { font-size: 14px; font-weight: 500; color: #2563eb }
+
+.card { background: white; padding: 18px; border-radius: 10px; margin-bottom: 12px; box-shadow: 0 1px 3px rgba(0,0,0,.06); }
+.card > div { margin: 4px 0; }
+.form-card { padding: 20px 22px; }
+.form-card h3 { margin-top: 0; }
+.form-row { display: flex; gap: 12px; align-items: flex-end; flex-wrap: wrap; }
+.form-field { display: flex; flex-direction: column; gap: 6px; flex: 1; min-width: 180px; }
+.form-label { font-size: 12px; font-weight: 600; color: #6b7280; text-transform: uppercase; letter-spacing: .03em; }
+
+.select-pretty, .input-pretty {
+  appearance: none;
+  -webkit-appearance: none;
+  padding: 10px 36px 10px 12px;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  background-color: white;
+  font-size: 14px;
+  color: #1f2937;
+  cursor: pointer;
+  transition: border-color .15s, box-shadow .15s;
+  min-width: 200px;
+}
+.input-pretty { padding-right: 12px; cursor: text; }
+.select-pretty {
+  background-image: url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath fill='%236b7280' d='M6 8 0 0h12z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+}
+.select-pretty:focus, .input-pretty:focus {
+  outline: none;
+  border-color: #2563eb;
+  box-shadow: 0 0 0 3px rgba(37,99,235,.15);
+}
+
+.btn-primary {
+  padding: 10px 20px;
+  background: #2563eb;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  height: 42px;
+  transition: background .15s;
+}
+.btn-primary:hover:not(:disabled) { background: #1d4ed8; }
+.btn-primary:disabled { background: #93c5fd; cursor: not-allowed; }
